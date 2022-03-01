@@ -39,30 +39,25 @@ I performed some data exploration on the training data prior to data augmentatio
 | False         | 9778          |
 | True          | 144           |
 ## Modelling Data
-From the data exploration, it is known that some product names do not contain their brand names. To extrapolate from product names to brand names in these cases requires inforamation external to the product names. Models that contain such external information are pretrained transformers like GPT2, GPT2 Medium, and GPT Neo 125M. There is a good variety among these three models in that GPT2 and GPT2 Medium differ mainly in model size while GPT2 and GPT Neo 125M differ mainly in the corpus they were pretrained on. For these reasons, I modelled the data by finetuning all three of these models on training data then selecting the model with the greatest accuracy on the valiation data.
+The problem of extrapolating from product names to brand names is a sequence-to-sequence problem. This problem may be thought of as "translating" product names to brand names. From the data exploration, it is known that some product names do not contain their brand names. To extrapolate from product names to brand names in these cases requires inforamation external to the product names. For these reasons, a pretrained sequence-to-sequence model may be good for this problem. Sequence-to-sequence models are trivially good for sequence-to-sequence problems and pretraining is a possible means of embedding inforamation external to the product names into the model. One such pretrained sequence-to-sequence model is the T5 model.
 
-With two data augmentaion techniques, there were four training datasets: a training dataset with no data augmentation, a training dataset augmented with easy data augmentation, a training dataset augmented with brand replacement, and a training dataset augmented with both. To decide what dataset to use, a model was fintuned on each of the four datasets then a dataset was selected by selecting the corresponding model with the greatest accuracy on the validation data. This was done for all three models.
+With two data augmentaion techniques, there were four training datasets: a training dataset with no data augmentation, a training dataset augmented with easy data augmentation, a training dataset augmented with brand replacement, and a training dataset augmented with both. To decide what dataset to use, the T5 model was finetuned on each of the four datasets then a dataset was selected by selecting the corresponding model with the greatest accuracy on the validation data.
 
-Mainly due to time and space constraints, the selected optimizer for all finetuning was stochastic gradient descent with a learning rate of 0.001, the batch size for all finetuning was 64, and the number of epochs was selected so as to achieve as close to 4687.5 optimization steps as possible. To generate brand names, beam search was selected as the decoding method of choice. The number of beams to search was set to 5, mainly for convenience.
+Mainly due to time and space constraints, the selected optimizer for all finetuning was AdamW with a learning rate of 0.0001, the batch size for all finetuning was 64, and the number of epochs was selected so as to achieve as close to 60000 optimization steps as possible. Copies of the T5 model were saved every epoch. To generate brand names, greedy search was selected as the decoding method of choice.
 
 From the data exploration, it is known that the majority of product names contain only a single word. Furthermore, it is known that the majority of product names start with their brand names. For these reasons, I selected a regular expression that extracts the first word in a string as the baseline.
 ## Interpreting Data
-GPT2 finetuned on the training data without data augmentation, with easy data augmentation, and with brand replacement yielded accuracies on the validation data that are greater than the baseline's accuracy on said data. Interestingly, GPT2 finetuned on the training data augmented with easy data augmentation and brand replacement, GPT2 Medium, and GPT Neo 125M achieve absurdly low accuracies on the validation data. GPT2 finetuned on the training data with easy data augmentation yielded the best accuracy on the valdiation data.
+The T5 model finetuned on any of the four training datasets achieves greater accuracy on the validation data than the baseline. Interestingly, easy data augmentation and brand replacement do not appear to boost the performance of the T5 model finetuned for the problem of extrapolating from product names to brand names.
 | Training Data | Model         | Optimizer     | Batch Size    | Epochs        | Val Accuracy  | Test Accuracy |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | N/A           | Baseline      | N/A           | N/A           | N/A           | 66.2%         | 66.8%         |
-| None          | GPT2          | SGD, lr=1e-3  | 64            | 30            | 79.2%         | 80.8%         |
-| EDA           | GPT2          | SGD, lr=1e-3  | 64            | 5             | 79.5%         | 80.8%         |
-| BR            | GPT2          | SGD, lr=1e-3  | 64            | 6             | 74.8%         | 77.0%         |
-| EDA + BR      | GPT2          | SGD, lr=1e-3  | 64            | 3             | 0.0%          | 0.2%          |
-| None          | GPT2 Medium   | SGD, lr=1e-3  | 64            | 30            | 0.0%          | 0.0%          |
-| EDA           | GPT2 Medium   | SGD, lr=1e-3  | 64            | 5             | 0.0%          | 0.0%          |
-| BR            | GPT2 Medium   | SGD, lr=1e-3  | 64            | 6             | 0.0%          | 0.0%          |
-| EDA + BR      | GPT2 Medium   | SGD, lr=1e-3  | 64            | 3             | 0.0%          | 0.0%          |
-| None          | GPT Neo 125M  | SGD, lr=1e-3  | 64            | 30            | 0.0%          | 0.0%          |
-| EDA           | GPT Neo 125M  | SGD, lr=1e-3  | 64            | 5             | 0.0%          | 0.0%          |
-| BR            | GPT Neo 125M  | SGD, lr=1e-3  | 64            | 6             | 0.0%          | 0.0%          |
-| EDA + BR      | GPT Neo 125M  | SGD, lr=1e-3  | 64            | 3             | 0.0%          | 0.0%          |
-
+| None          | T5 Small      | AdamW, lr=1e-4| 64            | 273           | 99.4%         | 99.3%         |
+| None          | T5 Small      | AdamW, lr=1e-4| 64            | 387           | 99.3%         | 99.3%         |
+| EDA           | T5 Small      | AdamW, lr=1e-4| 64            | 8             | 99.3%         | 99.1%         |
+| EDA           | T5 Small      | AdamW, lr=1e-4| 64            | 65            | 99.2%         | 99.2%         |
+| BR            | T5 Small      | AdamW, lr=1e-4| 64            | 70            | 99.3%         | 99.3%         |
+| BR            | T5 Small      | AdamW, lr=1e-4| 64            | 77            | 99.2%         | 99.2%         |
+| EDA + BR      | T5 Small      | AdamW, lr=1e-4| 64            | 27            | 99.3%         | 99.2%         |
+| EDA + BR      | T5 Small      | AdamW, lr=1e-4| 64            | 39            | 99.1%         | 99.1%         |
 ## Conclusion
-Finetuning GPT2 on the training data augmented with easy data augmentation yielded an accuracy of 80.8% on the test data. This is significantly better than the baseline and its accuracy of 66.8% on the test data. Nonetheless, an accuracy of 80.8% is not excellent. If time permitted, some interesting avenues for exploration could be to pretrain models on a corpus specific to brands and products prior to finetuning and to finetune GPT2 Medium and GPT Neo 125M with larger batch sizes and more epochs.
+Finetuning the T5 model on the training data with no data augmentation for 273 epochs yielded an accuracy of 99.3% on the test data. This is significantly better than the baseline and its accuracy of 66.8% on the test data.
