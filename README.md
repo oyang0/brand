@@ -6,7 +6,7 @@ A subproblem in the research and development of the Vendor Propensity Engine was
 
 Inspired by this subproblem, I tried to solve the problem of extrapolating from product names to brand names. This problem is similar to the subproblem in that if the brand names of products are correctly extrapolated, then determining if two products are from the same brand may be accomplished with simple string matching.
 
-NOTE: due to the file size of the models, they have not been pushed to this repository. To download the missing folder containing the models, download the [ZIP file](https://drive.google.com/file/d/1yzQlJjBwiB3LSzUVr1Z5JqC6yA3PmXkB/view?usp=sharing) containing the folder and extract said folder to this directory.
+NOTE: due to the file size of the models, they have not been pushed to this repository. To download the missing folder containing the models, download the [ZIP file](https://drive.google.com/file/d/1S05fix48BAa6l5kU9FgeGHsSQ9kmgsNU/view?usp=sharing) containing the folder and extract said folder to this directory.
 ## Obtaining Data
 The relevant data here are product names and their brand names. Such data may be obtained from Hackathon_Ideal_Data.csv available at [Store Transaction data](https://www.kaggle.com/iamprateek/store-transaction-data). The MBRD column contains brand names and the MRD column contains product names.
 ## Scrubbing Data
